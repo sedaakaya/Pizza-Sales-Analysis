@@ -48,20 +48,17 @@ ALTER TABLE orders
 MODIFY time TIME;
 
 -- TOTAL REVENUE --
-
 SELECT ROUND(SUM(od.quantity * p.price),2) AS total_revenue 
 FROM order_details od
 JOIN pizza_details p 
 ON od.pizza_id = p.pizza_id;
 
 -- TOTAL NUMBER OF PİZZAS SOLD ----
-
- SELECT SUM(quantity) AS pizzas_sold
- FROM order_details
+SELECT SUM(quantity) AS pizzas_sold
+FROM order_details
  
 
 -- TOTAL ORDERS ----
-
 SELECT COUNT(DISTINCT(order_id)) AS total_orders
 FROM orders
 
@@ -82,13 +79,11 @@ JOIN pizzas p
 ON od.pizza_id=p.pizza_id
 
 -- AVERAGE NUMBER OF PİZZAS PER ORDER
-
 SELECT ROUND(SUM(quantity)/COUNT(DISTINCT(order_id)),0) AS avg_num_piz
 FROM order_price_details
 
 
 -- TOTAL REVENUE AND NUMBER OF ORDERS PER CATEGORY
-
 SELECT ROUND(SUM(quantity*price),2) AS total_revenue, pt.category, COUNT(DISTINCT(opd.order_id)) AS Number_order
 FROM order_price_details AS opd
 JOIN pizza_types pt
@@ -96,7 +91,6 @@ ON opd.pizza_type_id=pt.pizza_type_id
 GROUP BY pt.category;
 
 -- TOTAL REVENUE AND NUMBER OF ORDERS PER SİZE
-
 SELECT ROUND(SUM(quantity*price),2) AS total_revenue, size, COUNT(DISTINCT(order_id)) AS number_order_per_size
 FROM order_price_details
 GROUP BY size
@@ -122,7 +116,6 @@ GROUP BY meal_time
 ORDER BY total_orders DESC;
 
 -- DAILY
-
 SELECT DAYNAME(o.date) AS day_name,
 COUNT(DISTINCT(o.order_id)) AS total_orders
 FROM order_details AS od
@@ -132,7 +125,6 @@ GROUP BY day_name
 ORDER BY total_orders DESC;
 
 -- MONTHLY
-
 SELECT MONTHNAME(o.date) AS month_name,
 COUNT(DISTINCT(o.order_id)) AS total_orders
 FROM order_details AS od
@@ -152,7 +144,6 @@ LIMIT 1;
 
 
 -- TOP 5 PİZZAS BY REVENUE -----
-
 SELECT SUM(od.quantity*pd.price) AS total_revenue_per_pizza, pd.name
 FROM pizza_details AS pd
 JOIN order_details od
@@ -168,7 +159,34 @@ JOIN order_details od
 ON pd.pizza_id = od.pizza_id
 GROUP BY pd.name
 ORDER BY  most_sales_pizza DESC
-LIMIT 3;
+LIMIT 5;
+
+-- PİZZA ANALYSIS -----
+SELECT name, price
+FROM pizza_details
+ORDER BY price DESC
+LIMIT 1;
+
+-- TOP USED INGREDIENTS ---
+SELECT * FROM pizza_details
+
+CREATE TEMPORARY TABLE numbers AS (
+    SELECT 1 AS n UNION ALL
+    SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL
+    SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL
+    SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+);
+
+SELECT ingredient, COUNT(ingredient) AS ingredient_count
+FROM (
+      SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(ingredients,',', n),',',-1) AS ingredient
+      FROM order_details
+      JOIN pizza_details ON pizza_details.pizza_id=order_details.pizza_id
+      JOIN numbers ON CHAR_LENGTH(ingredients)-CHAR_LENGTH(REPLACE(ingredients, ',', '')) >= n-1
+      ) AS subquery
+GROUP BY ingredient
+ORDER BY ingredient_count DESC;      
+
 
 
 
@@ -177,7 +195,7 @@ LIMIT 3;
 
 
  
-
+ 
 
 
 
